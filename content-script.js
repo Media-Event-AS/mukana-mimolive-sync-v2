@@ -130,6 +130,12 @@ class MukanaScraperInjector {
                     console.log('🔄 Adding missing questionTagLayer to existing config');
                 }
                 
+                // If stored config is missing the new panelistQueueLayer, add it with default value
+                if (!storedConfig.panelistQueueLayer) {
+                    storedConfig.panelistQueueLayer = '6EEAD85B-1057-4490-934F-EB524BA1EDC5';
+                    console.log('🔄 Adding missing panelistQueueLayer to existing config');
+                }
+                
                 this.config = storedConfig;
             } else {
                 // Use default config if stored config is incomplete
@@ -140,7 +146,9 @@ class MukanaScraperInjector {
                     questionTagLayer: 'FE24ACB7-524C-4659-B04D-824FB91F1E05',
                     textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
                     locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
-                    sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
+                    panelistQueueLayer: '6EEAD85B-1057-4490-934F-EB524BA1EDC5',
+                    sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0',
+                    qrContentPath: 'data.attributes.input-values.tvGroup_Content__QR_Content'
                 };
                 console.log('🔄 Using default config (stored config incomplete)');
             }
@@ -168,6 +176,7 @@ class MukanaScraperInjector {
                 questionTagLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC8',
                 textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
                 locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
+                panelistQueueLayer: '6EEAD85B-1057-4490-934F-EB524BA1EDC5',
                 sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
             };
         }
@@ -353,6 +362,18 @@ class MukanaScraperInjector {
                             </div>
                         </div>
                         
+                        <!-- Panelist Endpoint Configuration -->
+                        <div style="margin-top: 8px; padding: 8px; background: var(--subsection-bg); border-radius: 3px; border-left: 3px solid var(--button-info-bg);">
+                            <div style="font-size: 10px; color: var(--config-text); margin-bottom: 6px; font-weight: bold;">👥 Panelist Queue Endpoint:</div>
+                            <div style="font-size: 9px; color: var(--config-text); margin-bottom: 6px; line-height: 1.2; font-style: italic;">
+                                Extracts panelist names queued to answer questions
+                            </div>
+                            <div style="margin-bottom: 6px;">
+                                <label style="font-size: 10px; color: var(--config-text); display: block; margin-bottom: 1px;">Layer ID:</label>
+                                <input type="text" id="mukana-panelist-queue-layer" value="${this.config?.panelistQueueLayer || '6EEAD85B-1057-4490-934F-EB524BA1EDC5'}" style="width: 100%; padding: 3px; border: 1px solid var(--input-border); border-radius: 2px; font-size: 10px; font-family: monospace; background: var(--input-bg); color: var(--input-text);">
+                            </div>
+                        </div>
+                        
                         <!-- Location Endpoint Configuration -->
                         <div style="margin-top: 8px; padding: 8px; background: var(--subsection-bg); border-radius: 3px; border-left: 4px solid var(--button-info-bg);">
                             <div style="font-size: 10px; color: var(--config-text); margin-bottom: 6px; font-weight: bold;">📍 Location Endpoint:</div>
@@ -405,6 +426,7 @@ class MukanaScraperInjector {
                             Port: <span id="config-port">${this.config?.port || '49262'}</span><br>
                             Username Layer: <span id="config-title-layer">${this.config?.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7'}</span><br>
                             Question Tag Layer: <span id="config-question-tag-layer">${this.config?.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8'}</span><br>
+                            Panelist Queue Layer: <span id="config-panelist-queue-layer">${this.config?.panelistQueueLayer || '6EEAD85B-1057-4490-934F-EB524BA1EDC5'}</span><br>
                             Text Layer: <span id="config-text-layer">${this.config?.textLayer || '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D'}</span><br>
                             Location Layer: <span id="config-location-layer">${this.config?.locationLayer || '73F19730-1C97-4660-8091-37428DDEC4A6'}</span><br>
                             Source ID: <span id="config-source-id">${this.config?.sourceId || '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'}</span>
@@ -415,6 +437,7 @@ class MukanaScraperInjector {
                             <strong>API Endpoints will be:</strong><br>
                             • Username: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7'}</code><br>
                             • Question Tag: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8'}</code><br>
+                            • Panelist Queue: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.panelistQueueLayer || '6EEAD85B-1057-4490-934F-EB524BA1EDC5'}</code><br>
                             • Text: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.textLayer || '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D'}</code><br>
                             • Location: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.locationLayer || '73F19730-1C97-4660-8091-37428DDEC4A6'}</code><br>
                             • QR: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/sources/${this.config?.sourceId || '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'}</code>
@@ -623,7 +646,7 @@ class MukanaScraperInjector {
             // Validate configuration before starting
             if (!this.config || !this.config.documentId || !this.config.port || 
                 !this.config.titleLayer || !this.config.questionTagLayer || !this.config.textLayer ||
-                !this.config.locationLayer || !this.config.sourceId) {
+                !this.config.locationLayer || !this.config.panelistQueueLayer || !this.config.sourceId) {
                 console.error('❌ Invalid configuration. Please configure all fields first.');
                 this.updateActivityIndicator('❌ Config Error', 'Please configure all fields');
                 alert('Please configure all the Document ID, Port, Layer IDs, and Source ID before starting the scraper.');
@@ -674,6 +697,13 @@ class MukanaScraperInjector {
                 console.error('❌ Invalid Question Tag Layer ID format. Should be valid UUID.');
                 this.updateActivityIndicator('❌ Config Error', 'Question Tag Layer should be valid UUID');
                 alert('Question Tag Layer ID should be valid UUID. Please check your configuration.');
+                return;
+            }
+            
+            if (!uuidRegex.test(this.config.panelistQueueLayer)) {
+                console.error('❌ Invalid Panelist Queue Layer ID format. Should be valid UUID.');
+                this.updateActivityIndicator('❌ Config Error', 'Panelist Queue Layer should be valid UUID');
+                alert('Panelist Queue Layer ID should be valid UUID. Please check your configuration.');
                 return;
             }
             
@@ -968,6 +998,9 @@ class MukanaScraperInjector {
                     // Extract URL from cleaned text and clean it further
                     const { url, cleanedText } = this.extractFirstDeepLink(textWithoutTag);
                     
+                    // Extract panelist queue data
+                    const panelistQueueData = this.extractPanelistQueueData(currentQuestion);
+                    
                     const data = {
                         id: currentQuestion.id || `question-current`,
                         username: username,
@@ -976,6 +1009,7 @@ class MukanaScraperInjector {
                         questionTag: tag,
                         originalComment: questionText,
                         extractedUrl: url,
+                        panelistQueue: panelistQueueData,
                         timestamp: Date.now(),
                         order: 1
                     };
@@ -1027,6 +1061,7 @@ class MukanaScraperInjector {
                         questionTag: commentData[0].questionTag,
                         originalComment: commentData[0].originalComment,
                         extractedUrl: commentData[0].extractedUrl,
+                        panelistQueue: commentData[0].panelistQueue,
                         timestamp: commentData[0].timestamp,
                         order: commentData[0].order
                     };
@@ -1046,6 +1081,9 @@ class MukanaScraperInjector {
                     console.log('📊 Stored data for next comparison:', this.lastCommentData);
                     console.log('🎯 MimoLive now shows question ID:', commentData[0]?.id);
                     console.log('📝 MimoLive now shows question text:', commentData[0]?.comment?.substring(0, 100));
+                    if (commentData[0]?.panelistQueue) {
+                        console.log('👥 MimoLive now shows panelist queue:', commentData[0].panelistQueue.summary);
+                    }
                     
                     // Verify storage was successful
                     if (this.lastCommentData && this.lastCommentData[0] && this.lastCommentData[0].id === commentData[0].id) {
@@ -1208,6 +1246,64 @@ class MukanaScraperInjector {
                     await this.clearQuestionTagEndpoint();
                 }
                 
+                // Now send the panelist queue data to the panelist endpoint
+                const panelistQueue = firstComment.panelistQueue;
+                
+                if (panelistQueue && panelistQueue.count > 0) {
+                    console.log('👥 Sending panelist queue update:', panelistQueue.summary);
+                    
+                    // Create URL-encoded JSON for the panelist queue update parameter
+                    const panelistUpdateData = {
+                        "input-values": {
+                            "tvGroup_Note__Note_TypeMultiline": panelistQueue.summary
+                        }
+                    };
+                    const panelistUpdateParam = encodeURIComponent(JSON.stringify(panelistUpdateData));
+                    
+                    // Build the full URL with the update parameter
+                    const panelistEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.panelistQueueLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Note__Note_TypeMultiline&update=${panelistUpdateParam}`;
+                    
+                    console.log('🌐 Attempting to connect to panelist queue endpoint:', panelistEndpoint);
+                    
+                    try {
+                        const panelistResponse = await fetch(panelistEndpoint, {
+                            method: 'GET',
+                            headers: {
+                                'User-Agent': 'MukanaScraper/1.0'
+                            }
+                        });
+                        
+                        if (panelistResponse.ok) {
+                            console.log('✅ Panelist queue update sent successfully via GET');
+                            console.log(`👥 Panelist queue updated: ${panelistQueue.summary}`);
+                            this.updateActivityIndicator('✅ Panelist Queue Updated', `Queue: ${panelistQueue.summary}`);
+                        } else {
+                            const responseText = await panelistResponse.text();
+                            console.error('❌ Failed to update panelist queue. Status:', panelistResponse.status);
+                            console.error('❌ Response text:', responseText);
+                            this.updateActivityIndicator('❌ Panelist Queue Update Failed', `Status: ${panelistResponse.status}`);
+                            throw new Error(`Panelist queue update failed: ${panelistResponse.status} - ${responseText}`);
+                        }
+                    } catch (panelistError) {
+                        console.error('❌ Error updating panelist queue:', panelistError);
+                        console.error('❌ Error details:', {
+                            name: panelistError.name,
+                            message: panelistError.message,
+                            stack: panelistError.stack
+                        });
+                        
+                        if (panelistError.name === 'TypeError' && panelistError.message.includes('fetch')) {
+                            console.error(`🌐 Network error: Unable to connect to ${panelistEndpoint}. Please check if the server is running and accessible.`);
+                        } else {
+                            console.error(`❌ Error updating panelist queue: ${panelistError.message}`);
+                        }
+                        // Continue with other updates even if panelist queue update fails
+                    }
+                } else {
+                    console.log('🧹 No panelist queue found, clearing panelist endpoint');
+                    await this.clearPanelistQueueEndpoint();
+                }
+                
                 // Now send the comment text to the second endpoint
                 const commentText = firstComment.comment;
                 
@@ -1317,12 +1413,14 @@ class MukanaScraperInjector {
                     console.log('🔗 Sending extracted URL to QR endpoint:', extractedUrl);
                     await this.sendURLToQREndpoint(extractedUrl);
                     const tagInfo = firstComment.questionTag ? ` + Tag: ${firstComment.questionTag}` : '';
-                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo} + Comment + Location + QR: ${extractedUrl}`);
+                    const queueInfo = firstComment.panelistQueue ? ` + Queue: ${firstComment.panelistQueue.summary}` : '';
+                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo}${queueInfo} + Comment + Location + QR: ${extractedUrl}`);
                 } else {
                     console.log('🧹 No URL found, clearing QR endpoint');
                     await this.clearQREndpoint();
                     const tagInfo = firstComment.questionTag ? ` + Tag: ${firstComment.questionTag}` : '';
-                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo} + Comment + Location + QR Cleared`);
+                    const queueInfo = firstComment.panelistQueue ? ` + Queue: ${firstComment.panelistQueue.summary}` : '';
+                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo}${queueInfo} + Comment + Location + QR Cleared`);
                 }
             } else {
                 // Default payload for other URLs
@@ -1507,14 +1605,18 @@ class MukanaScraperInjector {
         const tagChanged = String(lastQuestion.questionTag || '') !== String(newQuestion.questionTag || '');
         const urlChanged = String(lastQuestion.extractedUrl || '') !== String(newQuestion.extractedUrl || '');
         
+        // Check if panelist queue has changed
+        const panelistQueueChanged = this.hasPanelistQueueChanged(lastQuestion.panelistQueue, newQuestion.panelistQueue);
+        
         console.log('🔍 Field comparison results:', {
             username: { old: lastQuestion.username, new: newQuestion.username, changed: usernameChanged },
             location: { old: lastQuestion.location, new: newQuestion.location, changed: locationChanged },
             tag: { old: lastQuestion.questionTag, new: newQuestion.questionTag, changed: tagChanged },
-            url: { old: lastQuestion.extractedUrl, new: newQuestion.extractedUrl, changed: urlChanged }
+            url: { old: lastQuestion.extractedUrl, new: newQuestion.extractedUrl, changed: urlChanged },
+            panelistQueue: { old: lastQuestion.panelistQueue, new: newQuestion.panelistQueue, changed: panelistQueueChanged }
         });
         
-        if (usernameChanged || locationChanged || tagChanged || urlChanged) {
+        if (usernameChanged || locationChanged || tagChanged || urlChanged || panelistQueueChanged) {
             console.log('📊 Data change detected in current question');
             return true;
         }
@@ -1547,6 +1649,7 @@ class MukanaScraperInjector {
         const portInput = document.getElementById('mukana-port');
         const titleLayerInput = document.getElementById('mukana-title-layer');
         const questionTagLayerInput = document.getElementById('mukana-question-tag-layer');
+        const panelistQueueLayerInput = document.getElementById('mukana-panelist-queue-layer');
         const textLayerInput = document.getElementById('mukana-text-layer');
         const locationLayerInput = document.getElementById('mukana-location-layer');
         const sourceIdInput = document.getElementById('mukana-source-id');
@@ -1555,6 +1658,7 @@ class MukanaScraperInjector {
         const configPortSpan = document.getElementById('config-port');
         const configTitleLayerSpan = document.getElementById('config-title-layer');
         const configQuestionTagLayerSpan = document.getElementById('config-question-tag-layer');
+        const configPanelistQueueLayerSpan = document.getElementById('config-panelist-queue-layer');
         const configTextLayerSpan = document.getElementById('config-text-layer');
         const configLocationLayerSpan = document.getElementById('config-location-layer');
         const configSourceIdSpan = document.getElementById('config-source-id');
@@ -1573,6 +1677,10 @@ class MukanaScraperInjector {
         
         if (questionTagLayerInput && this.config) {
             questionTagLayerInput.value = this.config.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8';
+        }
+        
+        if (panelistQueueLayerInput && this.config) {
+            panelistQueueLayerInput.value = this.config.panelistQueueLayer || '6EEAD85B-1057-4490-934F-EB524BA1EDC5';
         }
         
         if (textLayerInput && this.config) {
@@ -1603,6 +1711,10 @@ class MukanaScraperInjector {
             configQuestionTagLayerSpan.textContent = this.config.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8';
         }
         
+        if (configPanelistQueueLayerSpan && this.config) {
+            configPanelistQueueLayerSpan.textContent = this.config.panelistQueueLayer || '6EEAD85B-1057-4490-934F-EB524BA1EDC5';
+        }
+        
         if (configTextLayerSpan && this.config) {
             configTextLayerSpan.textContent = this.config.textLayer || '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D';
         }
@@ -1631,6 +1743,8 @@ class MukanaScraperInjector {
             apiEndpointsInfo.innerHTML = `
                 <strong>API Endpoints will be:</strong><br>
                 • Username: <code>127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.titleLayer}</code><br>
+                • Question Tag: <code>127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.questionTagLayer}</code><br>
+                • Panelist Queue: <code>127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.panelistQueueLayer}</code><br>
                 • Text: <code>127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.textLayer}</code><br>
                 • Location: <code>127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.locationLayer}</code><br>
                 • QR: <code>127.0.0.1:${port}/api/v1/documents/${docId}/sources/${this.config.sourceId}</code>
@@ -1654,6 +1768,9 @@ class MukanaScraperInjector {
 
 Question Tag Endpoint:
 127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.questionTagLayer}
+
+Panelist Queue Endpoint:
+127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.panelistQueueLayer}
 
 Text Endpoint:
 127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.textLayer}
@@ -1736,6 +1853,138 @@ QR Endpoint:
         console.log('📝 Cleaned question text:', cleanedText);
         
         return { tag: tag, cleanedText: cleanedText };
+    }
+    
+    // Extract panelist queue data from question element
+    extractPanelistQueueData(questionElement) {
+        try {
+            console.log('👥 Extracting panelist queue data...');
+            
+            // Find the div with ID starting with "panelQs-hands"
+            const panelQsHands = questionElement.querySelector('div[id^="panelQs-hands"]');
+            if (!panelQsHands) {
+                console.log('⏭️ No panelQs-hands div found in question');
+                return null;
+            }
+            
+            // Find all divs with class "queued hostControl"
+            const queuedPanelists = panelQsHands.querySelectorAll('div.queued.hostControl');
+            console.log(`👥 Found ${queuedPanelists.length} queued panelists`);
+            
+            if (queuedPanelists.length === 0) {
+                console.log('⏭️ No queued panelists found');
+                return null;
+            }
+            
+            const panelistData = [];
+            
+            queuedPanelists.forEach((panelistDiv, index) => {
+                try {
+                    // Get the data-pos index
+                    const position = panelistDiv.getAttribute('data-pos');
+                    
+                    // Find the panelist_nameWrap div
+                    const nameWrap = panelistDiv.querySelector('.panelist_nameWrap');
+                    if (!nameWrap) {
+                        console.log(`⚠️ No panelist_nameWrap found for panelist ${index}`);
+                        return;
+                    }
+                    
+                    // Extract the text content (format: "number. period space Name")
+                    const nameText = nameWrap.textContent.trim();
+                    
+                    // Parse the name using regex to extract number and name
+                    const nameMatch = nameText.match(/^(\d+)\.\s+(.+)$/);
+                    if (nameMatch) {
+                        const queueNumber = parseInt(nameMatch[1]);
+                        const panelistName = nameMatch[2].trim();
+                        
+                        const panelist = {
+                            position: position ? parseInt(position) : index + 1,
+                            queueNumber: queueNumber,
+                            name: panelistName,
+                            rawText: nameText
+                        };
+                        
+                        panelistData.push(panelist);
+                        console.log(`✅ Extracted panelist: Position ${panelist.position}, Queue #${panelist.queueNumber}, Name: "${panelistName}"`);
+                    } else {
+                        console.log(`⚠️ Could not parse panelist name format: "${nameText}"`);
+                        // Fallback: use the raw text
+                        const panelist = {
+                            position: position ? parseInt(position) : index + 1,
+                            queueNumber: index + 1,
+                            name: nameText,
+                            rawText: nameText
+                        };
+                        panelistData.push(panelist);
+                    }
+                    
+                } catch (panelistError) {
+                    console.error(`❌ Error extracting panelist ${index}:`, panelistError);
+                }
+            });
+            
+            if (panelistData.length > 0) {
+                // Sort by queue number to maintain order
+                panelistData.sort((a, b) => a.queueNumber - b.queueNumber);
+                
+                const result = {
+                    count: panelistData.length,
+                    panelists: panelistData,
+                    summary: panelistData.map(p => `${p.queueNumber}. ${p.name}`).join(', '),
+                    timestamp: Date.now()
+                };
+                
+                console.log('✅ Panelist queue data extracted successfully:', result);
+                return result;
+            } else {
+                console.log('⏭️ No valid panelist data extracted');
+                return null;
+            }
+            
+        } catch (error) {
+            console.error('❌ Error extracting panelist queue data:', error);
+            return null;
+        }
+    }
+    
+    // Check if panelist queue data has changed
+    hasPanelistQueueChanged(oldQueue, newQueue) {
+        // If both are null/undefined, no change
+        if (!oldQueue && !newQueue) {
+            return false;
+        }
+        
+        // If one is null/undefined and the other isn't, there's a change
+        if (!oldQueue || !newQueue) {
+            return true;
+        }
+        
+        // If counts are different, there's a change
+        if (oldQueue.count !== newQueue.count) {
+            return true;
+        }
+        
+        // Check if any panelist names or positions have changed
+        if (oldQueue.panelists.length !== newQueue.panelists.length) {
+            return true;
+        }
+        
+        // Compare each panelist
+        for (let i = 0; i < oldQueue.panelists.length; i++) {
+            const oldPanelist = oldQueue.panelists[i];
+            const newPanelist = newQueue.panelists[i];
+            
+            if (oldPanelist.name !== newPanelist.name || 
+                oldPanelist.queueNumber !== newPanelist.queueNumber ||
+                oldPanelist.position !== newPanelist.position) {
+                return true;
+            }
+        }
+        
+        // No changes detected
+        return false;
     }
     
     // Send URL to QR endpoint
@@ -1868,6 +2117,50 @@ QR Endpoint:
         } catch (error) {
             console.error('❌ Error clearing question tag endpoint:', error);
             this.updateActivityIndicator('❌ Tag Clear Error', error.message);
+        }
+    }
+    
+    // Clear panelist queue endpoint (send empty string)
+    async clearPanelistQueueEndpoint() {
+        try {
+            if (!this.config || !this.config.panelistQueueLayer) {
+                console.error('❌ Panelist Queue Layer not configured for panelist endpoint');
+                return;
+            }
+            
+            // Create URL-encoded JSON for the update parameter with empty string
+            const updateData = {
+                "input-values": {
+                    "tvGroup_Content__Text_TypeMultiline": ""
+                }
+            };
+            const updateParam = encodeURIComponent(JSON.stringify(updateData));
+            
+            // Build the full URL with the update parameter
+            const panelistEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.panelistQueueLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Content__Text_TypeMultiline&update=${updateParam}`;
+            
+            console.log('🌐 Clearing panelist queue endpoint:', panelistEndpoint);
+            
+            const response = await fetch(panelistEndpoint, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'MukanaScraper/1.0'
+                }
+            });
+            
+            if (response.ok) {
+                console.log('✅ Panelist queue endpoint cleared successfully');
+                this.updateActivityIndicator('✅ Panelist Queue Cleared', 'Panelist queue field cleared');
+            } else {
+                const responseText = await response.text();
+                console.error('❌ Failed to clear panelist queue endpoint. Status:', response.status);
+                console.error('❌ Response text:', responseText);
+                this.updateActivityIndicator('❌ Panelist Queue Clear Failed', `Status: ${response.status}`);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error clearing panelist queue endpoint:', error);
+            this.updateActivityIndicator('❌ Panelist Queue Clear Error', error.message);
         }
     }
     
@@ -2093,6 +2386,7 @@ performQuestionCheck() {
             console.log('  - Comment:', lastData.comment?.substring(0, 50));
             console.log('  - Location:', lastData.location);
             console.log('  - URL:', lastData.extractedUrl);
+            console.log('  - Panelist Queue:', lastData.panelistQueue);
             console.log('  - Timestamp:', lastData.timestamp);
             console.log('  - Order:', lastData.order);
         }
@@ -2107,6 +2401,7 @@ performQuestionCheck() {
                 location: currentQuestion.querySelector('.msg_user .uLoc')?.textContent.trim() || '',
                 comment: currentQuestion.querySelector('.msg_text')?.textContent.trim() || 'No text',
                 extractedUrl: '',
+                panelistQueue: this.extractPanelistQueueData(currentQuestion),
                 timestamp: Date.now(),
                 order: 1
             }];
@@ -2236,7 +2531,8 @@ performQuestionCheck() {
                 id: currentQuestion.id,
                 username: currentQuestion.querySelector('.msg_user .uName')?.textContent.trim(),
                 location: currentQuestion.querySelector('.msg_user .uLoc')?.textContent.trim(),
-                hasUrl: !!currentQuestion.querySelector('.msg_text')?.textContent.includes('http')
+                hasUrl: !!currentQuestion.querySelector('.msg_text')?.textContent.includes('http'),
+                panelistQueue: this.extractPanelistQueueData(currentQuestion)
             });
         }
         
@@ -2264,7 +2560,8 @@ performQuestionCheck() {
                 id: currentQuestion.id,
                 username: currentQuestion.querySelector('.msg_user .uName')?.textContent.trim() || 'Unknown',
                 location: currentQuestion.querySelector('.msg_user .uLoc')?.textContent.trim() || 'Unknown',
-                text: currentQuestion.querySelector('.msg_text')?.textContent.trim()?.substring(0, 100) || 'No text'
+                text: currentQuestion.querySelector('.msg_text')?.textContent.trim()?.substring(0, 100) || 'No text',
+                panelistQueue: this.extractPanelistQueueData(currentQuestion)
             };
             console.log('🎯 Current question in DOM:', currentData);
         } else {
@@ -2278,7 +2575,8 @@ performQuestionCheck() {
                 id: storedData.id,
                 username: storedData.username,
                 location: storedData.location,
-                text: storedData.comment?.substring(0, 100) || 'No text'
+                text: storedData.comment?.substring(0, 100) || 'No text',
+                panelistQueue: storedData.panelistQueue
             });
         } else {
             console.log('📊 Nothing stored in extension');
@@ -2291,7 +2589,8 @@ performQuestionCheck() {
                 id: mimoLiveData.id,
                 username: mimoLiveData.username,
                 location: mimoLiveData.location,
-                text: mimoLiveData.comment?.substring(0, 100) || 'No text'
+                text: mimoLiveData.comment?.substring(0, 100) || 'No text',
+                panelistQueue: mimoLiveData.panelistQueue
             });
         } else {
             console.log('🎬 MimoLive should show: Nothing (no data stored)');
@@ -2340,6 +2639,18 @@ performQuestionCheck() {
             
             await fetch(tagEndpoint, { method: 'GET' });
             console.log('✅ Question tag cleared in mimoLive');
+            
+            // Clear panelist queue
+            const clearPanelistData = {
+                "input-values": {
+                    "tvGroup_Content__Text_TypeMultiline": ""
+                }
+            };
+            const panelistParam = encodeURIComponent(JSON.stringify(clearPanelistData));
+            const panelistEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.panelistQueueLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Content__Text_TypeMultiline&update=${panelistParam}`;
+            
+            await fetch(panelistEndpoint, { method: 'GET' });
+            console.log('✅ Panelist queue cleared in mimoLive');
             
             // Clear location
             const clearLocationData = {
@@ -2499,6 +2810,7 @@ performQuestionCheck() {
             const port = document.getElementById('mukana-port').value.trim();
             const titleLayer = document.getElementById('mukana-title-layer').value.trim();
             const questionTagLayer = document.getElementById('mukana-question-tag-layer').value.trim();
+            const panelistQueueLayer = document.getElementById('mukana-panelist-queue-layer').value.trim();
             const textLayer = document.getElementById('mukana-text-layer').value.trim();
             const locationLayer = document.getElementById('mukana-location-layer').value.trim();
             const sourceId = document.getElementById('mukana-source-id').value.trim();
@@ -2523,6 +2835,11 @@ performQuestionCheck() {
                 return;
             }
             
+            if (!panelistQueueLayer) {
+                alert('Please enter a valid Panelist Queue Layer ID');
+                return;
+            }
+            
             if (!textLayer) {
                 alert('Please enter a valid Text Layer ID');
                 return;
@@ -2544,6 +2861,7 @@ performQuestionCheck() {
                 port: port,
                 titleLayer: titleLayer,
                 questionTagLayer: questionTagLayer,
+                panelistQueueLayer: panelistQueueLayer,
                 textLayer: textLayer,
                 locationLayer: locationLayer,
                 sourceId: sourceId
@@ -2587,6 +2905,7 @@ performQuestionCheck() {
                 port: '49262',
                 titleLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC7',
                 questionTagLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC8',
+                panelistQueueLayer: '6EEAD85B-1057-4490-934F-EB524BA1EDC5',
                 textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
                 locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
                 sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
@@ -2605,6 +2924,7 @@ performQuestionCheck() {
             const portInput = document.getElementById('mukana-port');
             const titleLayerInput = document.getElementById('mukana-title-layer');
             const questionTagLayerInput = document.getElementById('mukana-question-tag-layer');
+            const panelistQueueLayerInput = document.getElementById('mukana-panelist-queue-layer');
             const textLayerInput = document.getElementById('mukana-text-layer');
             const locationLayerInput = document.getElementById('mukana-location-layer');
             const sourceIdInput = document.getElementById('mukana-source-id');
@@ -2613,6 +2933,7 @@ performQuestionCheck() {
             if (portInput) portInput.value = defaultConfig.port;
             if (titleLayerInput) titleLayerInput.value = defaultConfig.titleLayer;
             if (questionTagLayerInput) questionTagLayerInput.value = defaultConfig.questionTagLayer;
+            if (panelistQueueLayerInput) panelistQueueLayerInput.value = defaultConfig.panelistQueueLayer;
             if (textLayerInput) textLayerInput.value = defaultConfig.textLayer;
             if (locationLayerInput) locationLayerInput.value = defaultConfig.locationLayer;
             if (sourceIdInput) sourceIdInput.value = defaultConfig.sourceId;
