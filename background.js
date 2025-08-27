@@ -26,7 +26,7 @@ chrome.action.onClicked.addListener((tab) => {
     console.log('🖱️ Extension icon clicked on tab:', tab.id);
     
     // Check if we're on a Mukana page
-    if (tab.url && (tab.url.includes('mukana-panelView') || tab.url.includes('mukana-panelist') || tab.url.includes('mukana-teleprompter'))) {
+    if ((tab.url.includes('mukana-panelView'))) {
         // Inject the scraper if not already present
         chrome.scripting.executeScript({
             target: { tabId: tab.id },

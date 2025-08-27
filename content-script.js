@@ -117,15 +117,47 @@ class MukanaScraperInjector {
     async loadConfig() {
         try {
             const result = await chrome.storage.local.get(['mukanaScraperConfig']);
-            this.config = result.mukanaScraperConfig || {
-                documentId: '572187142',
-                port: '49262',
-                titleLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC7',
-                textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
-                locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
-                sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
-            };
+            const storedConfig = result.mukanaScraperConfig;
+            
+            // Check if stored config exists and has all required fields
+            if (storedConfig && storedConfig.documentId && storedConfig.port && 
+                storedConfig.titleLayer && storedConfig.textLayer && 
+                storedConfig.locationLayer && storedConfig.sourceId) {
+                
+                // If stored config is missing the new questionTagLayer, add it with default value
+                if (!storedConfig.questionTagLayer) {
+                    storedConfig.questionTagLayer = 'D692CF88-5C77-47F3-A513-5129BDB76FC8';
+                    console.log('🔄 Adding missing questionTagLayer to existing config');
+                }
+                
+                this.config = storedConfig;
+            } else {
+                // Use default config if stored config is incomplete
+                this.config = {
+                    documentId: '1185605207',
+                    port: '8989',
+                    titleLayer: 'FE24ACB7-524C-4659-B04D-824FB91F1E05',
+                    questionTagLayer: 'FE24ACB7-524C-4659-B04D-824FB91F1E05',
+                    textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
+                    locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
+                    sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
+                };
+                console.log('🔄 Using default config (stored config incomplete)');
+            }
+            
             console.log('📋 Loaded config:', this.config);
+            
+            // Auto-save the config if we had to add missing fields
+            if (storedConfig && !storedConfig.questionTagLayer) {
+                try {
+                    await chrome.storage.local.set({
+                        mukanaScraperConfig: this.config
+                    });
+                    console.log('✅ Updated config saved to storage');
+                } catch (saveError) {
+                    console.warn('⚠️ Failed to save updated config:', saveError);
+                }
+            }
         } catch (error) {
             console.error('❌ Failed to load config:', error);
             // Set default config if loading fails
@@ -133,6 +165,7 @@ class MukanaScraperInjector {
                 documentId: '572187142',
                 port: '49262',
                 titleLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC7',
+                questionTagLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC8',
                 textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
                 locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
                 sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
@@ -309,7 +342,15 @@ class MukanaScraperInjector {
                                 <label style="font-size: 10px; color: var(--config-text); display: block; margin-bottom: 1px;">Layer ID:</label>
                                 <input type="text" id="mukana-title-layer" value="${this.config?.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7'}" style="width: 100%; padding: 3px; border: 1px solid var(--input-border); border-radius: 2px; font-size: 10px; font-family: monospace; background: var(--input-bg); color: var(--input-text);">
                             </div>
-
+                        </div>
+                        
+                        <!-- Question Tag Endpoint Configuration -->
+                        <div style="margin-top: 8px; padding: 8px; background: var(--subsection-bg); border-radius: 3px; border-left: 3px solid var(--button-warning-bg);">
+                            <div style="font-size: 10px; color: var(--config-text); margin-bottom: 6px; font-weight: bold;">🏷️ Question Tag Endpoint:</div>
+                            <div style="margin-bottom: 6px;">
+                                <label style="font-size: 10px; color: var(--config-text); display: block; margin-bottom: 1px;">Layer ID:</label>
+                                <input type="text" id="mukana-question-tag-layer" value="${this.config?.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8'}" style="width: 100%; padding: 3px; border: 1px solid var(--input-border); border-radius: 2px; font-size: 10px; font-family: monospace; background: var(--input-bg); color: var(--input-text);">
+                            </div>
                         </div>
                         
                         <!-- Location Endpoint Configuration -->
@@ -363,6 +404,7 @@ class MukanaScraperInjector {
                             Document ID: <span id="config-doc-id">${this.config?.documentId || '572187142'}</span><br>
                             Port: <span id="config-port">${this.config?.port || '49262'}</span><br>
                             Username Layer: <span id="config-title-layer">${this.config?.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7'}</span><br>
+                            Question Tag Layer: <span id="config-question-tag-layer">${this.config?.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8'}</span><br>
                             Text Layer: <span id="config-text-layer">${this.config?.textLayer || '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D'}</span><br>
                             Location Layer: <span id="config-location-layer">${this.config?.locationLayer || '73F19730-1C97-4660-8091-37428DDEC4A6'}</span><br>
                             Source ID: <span id="config-source-id">${this.config?.sourceId || '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'}</span>
@@ -372,6 +414,7 @@ class MukanaScraperInjector {
                         <div style="margin-top: 8px; padding: 6px; background: var(--status-info-bg); border-radius: 3px; border-left: 4px solid var(--button-info-bg); font-size: 9px; color: var(--status-info-text); line-height: 1.2;">
                             <strong>API Endpoints will be:</strong><br>
                             • Username: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7'}</code><br>
+                            • Question Tag: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8'}</code><br>
                             • Text: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.textLayer || '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D'}</code><br>
                             • Location: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/layers/${this.config?.locationLayer || '73F19730-1C97-4660-8091-37428DDEC4A6'}</code><br>
                             • QR: <code>127.0.0.1:${this.config?.port || '49262'}/api/v1/documents/${this.config?.documentId || '572187142'}/sources/${this.config?.sourceId || '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'}</code>
@@ -579,7 +622,7 @@ class MukanaScraperInjector {
             
             // Validate configuration before starting
             if (!this.config || !this.config.documentId || !this.config.port || 
-                !this.config.titleLayer || !this.config.textLayer ||
+                !this.config.titleLayer || !this.config.questionTagLayer || !this.config.textLayer ||
                 !this.config.locationLayer || !this.config.sourceId) {
                 console.error('❌ Invalid configuration. Please configure all fields first.');
                 this.updateActivityIndicator('❌ Config Error', 'Please configure all fields');
@@ -620,14 +663,21 @@ class MukanaScraperInjector {
                 return;
             }
             
-            if (!uuidRegex.test(this.config.locationLayer)) {
+                        if (!uuidRegex.test(this.config.locationLayer)) {
                 console.error('❌ Invalid Location Layer ID format. Should be valid UUID.');
                 this.updateActivityIndicator('❌ Config Error', 'Location Layer should be valid UUID');
                 alert('Location Layer ID should be valid UUID. Please check your configuration.');
                 return;
             }
             
-
+            if (!uuidRegex.test(this.config.questionTagLayer)) {
+                console.error('❌ Invalid Question Tag Layer ID format. Should be valid UUID.');
+                this.updateActivityIndicator('❌ Config Error', 'Question Tag Layer should be valid UUID');
+                alert('Question Tag Layer ID should be valid UUID. Please check your configuration.');
+                return;
+            }
+            
+            
             
             console.log('✅ Configuration validated. Starting DOM watcher...');
             console.log('📋 Using configuration:', this.config);
@@ -912,14 +962,18 @@ class MukanaScraperInjector {
                     const textElement = currentQuestion.querySelector('.msg_text');
                     const questionText = textElement ? textElement.textContent.trim() : 'No text';
                     
-                    // Extract URL from question text and clean the text
-                    const { url, cleanedText } = this.extractFirstDeepLink(questionText);
+                    // Extract question tag and clean the text
+                    const { tag, cleanedText: textWithoutTag } = this.extractQuestionTag(questionText);
+                    
+                    // Extract URL from cleaned text and clean it further
+                    const { url, cleanedText } = this.extractFirstDeepLink(textWithoutTag);
                     
                     const data = {
                         id: currentQuestion.id || `question-current`,
                         username: username,
                         location: location,
                         comment: cleanedText,
+                        questionTag: tag,
                         originalComment: questionText,
                         extractedUrl: url,
                         timestamp: Date.now(),
@@ -970,6 +1024,7 @@ class MukanaScraperInjector {
                         username: commentData[0].username,
                         location: commentData[0].location,
                         comment: commentData[0].comment,
+                        questionTag: commentData[0].questionTag,
                         originalComment: commentData[0].originalComment,
                         extractedUrl: commentData[0].extractedUrl,
                         timestamp: commentData[0].timestamp,
@@ -1095,6 +1150,64 @@ class MukanaScraperInjector {
                     return; // Don't continue with text update if title update failed
                 }
                 
+                // Now send the question tag to the question tag endpoint
+                const questionTag = firstComment.questionTag;
+                
+                if (questionTag) {
+                    console.log('🏷️ Sending question tag update:', questionTag);
+                    
+                    // Create URL-encoded JSON for the question tag update parameter
+                    const tagUpdateData = {
+                        "input-values": {
+                            "tvGroup_Content__Text_TypeMultiline": questionTag
+                        }
+                    };
+                    const tagUpdateParam = encodeURIComponent(JSON.stringify(tagUpdateData));
+                    
+                    // Build the full URL with the update parameter
+                    const tagEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.questionTagLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Content__Text_TypeMultiline&update=${tagUpdateParam}`;
+                    
+                    console.log('🌐 Attempting to connect to question tag endpoint:', tagEndpoint);
+                    
+                    try {
+                        const tagResponse = await fetch(tagEndpoint, {
+                            method: 'GET',
+                            headers: {
+                                'User-Agent': 'MukanaScraper/1.0'
+                            }
+                        });
+                        
+                        if (tagResponse.ok) {
+                            console.log('✅ Question tag update sent successfully via GET');
+                            console.log(`🏷️ Question tag updated to: ${questionTag}`);
+                            this.updateActivityIndicator('✅ Tag Updated', `Question Tag: ${questionTag}`);
+                        } else {
+                            const responseText = await tagResponse.text();
+                            console.error('❌ Failed to update question tag. Status:', tagResponse.status);
+                            console.error('❌ Response text:', responseText);
+                            this.updateActivityIndicator('❌ Tag Update Failed', `Status: ${tagResponse.status}`);
+                            throw new Error(`Question tag update failed: ${tagResponse.status} - ${responseText}`);
+                        }
+                    } catch (tagError) {
+                        console.error('❌ Error updating question tag:', tagError);
+                        console.error('❌ Error details:', {
+                            name: tagError.name,
+                            message: tagError.message,
+                            stack: tagError.stack
+                        });
+                        
+                        if (tagError.name === 'TypeError' && tagError.message.includes('fetch')) {
+                            console.error(`🌐 Network error: Unable to connect to ${tagEndpoint}. Please check if the server is running and accessible.`);
+                        } else {
+                            console.error(`❌ Error updating question tag: ${tagError.message}`);
+                        }
+                        // Continue with other updates even if tag update fails
+                    }
+                } else {
+                    console.log('🧹 No question tag found, clearing tag endpoint');
+                    await this.clearQuestionTagEndpoint();
+                }
+                
                 // Now send the comment text to the second endpoint
                 const commentText = firstComment.comment;
                 
@@ -1203,11 +1316,13 @@ class MukanaScraperInjector {
                 if (extractedUrl) {
                     console.log('🔗 Sending extracted URL to QR endpoint:', extractedUrl);
                     await this.sendURLToQREndpoint(extractedUrl);
-                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username} + Comment + Location + QR: ${extractedUrl}`);
+                    const tagInfo = firstComment.questionTag ? ` + Tag: ${firstComment.questionTag}` : '';
+                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo} + Comment + Location + QR: ${extractedUrl}`);
                 } else {
                     console.log('🧹 No URL found, clearing QR endpoint');
                     await this.clearQREndpoint();
-                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username} + Comment + Location + QR Cleared`);
+                    const tagInfo = firstComment.questionTag ? ` + Tag: ${firstComment.questionTag}` : '';
+                    this.updateActivityIndicator('✅ Complete Update', `Title: ${username}${tagInfo} + Comment + Location + QR Cleared`);
                 }
             } else {
                 // Default payload for other URLs
@@ -1389,13 +1504,20 @@ class MukanaScraperInjector {
         // Check if any field has changed - use strict comparison
         const usernameChanged = String(lastQuestion.username) !== String(newQuestion.username);
         const locationChanged = String(lastQuestion.location) !== String(newQuestion.location);
+        const tagChanged = String(lastQuestion.questionTag || '') !== String(newQuestion.questionTag || '');
         const urlChanged = String(lastQuestion.extractedUrl || '') !== String(newQuestion.extractedUrl || '');
         
         console.log('🔍 Field comparison results:', {
             username: { old: lastQuestion.username, new: newQuestion.username, changed: usernameChanged },
             location: { old: lastQuestion.location, new: newQuestion.location, changed: locationChanged },
+            tag: { old: lastQuestion.questionTag, new: newQuestion.questionTag, changed: tagChanged },
             url: { old: lastQuestion.extractedUrl, new: newQuestion.extractedUrl, changed: urlChanged }
         });
+        
+        if (usernameChanged || locationChanged || tagChanged || urlChanged) {
+            console.log('📊 Data change detected in current question');
+            return true;
+        }
         
         // Also check if the question ID changed (different question being answered)
         const questionIdChanged = lastQuestion.id !== newQuestion.id;
@@ -1404,11 +1526,6 @@ class MukanaScraperInjector {
             console.log('🔄 Switching from question:', lastQuestion.id, 'to:', newQuestion.id);
             console.log('📝 Old question text:', lastQuestion.comment?.substring(0, 100));
             console.log('📝 New question text:', newQuestion.comment?.substring(0, 100));
-            return true;
-        }
-        
-        if (usernameChanged || locationChanged || urlChanged) {
-            console.log('📊 Data change detected in current question');
             return true;
         }
         
@@ -1429,6 +1546,7 @@ class MukanaScraperInjector {
         const documentIdInput = document.getElementById('mukana-document-id');
         const portInput = document.getElementById('mukana-port');
         const titleLayerInput = document.getElementById('mukana-title-layer');
+        const questionTagLayerInput = document.getElementById('mukana-question-tag-layer');
         const textLayerInput = document.getElementById('mukana-text-layer');
         const locationLayerInput = document.getElementById('mukana-location-layer');
         const sourceIdInput = document.getElementById('mukana-source-id');
@@ -1436,6 +1554,7 @@ class MukanaScraperInjector {
         const configDocIdSpan = document.getElementById('config-doc-id');
         const configPortSpan = document.getElementById('config-port');
         const configTitleLayerSpan = document.getElementById('config-title-layer');
+        const configQuestionTagLayerSpan = document.getElementById('config-question-tag-layer');
         const configTextLayerSpan = document.getElementById('config-text-layer');
         const configLocationLayerSpan = document.getElementById('config-location-layer');
         const configSourceIdSpan = document.getElementById('config-source-id');
@@ -1450,6 +1569,10 @@ class MukanaScraperInjector {
         
         if (titleLayerInput && this.config) {
             titleLayerInput.value = this.config.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7';
+        }
+        
+        if (questionTagLayerInput && this.config) {
+            questionTagLayerInput.value = this.config.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8';
         }
         
         if (textLayerInput && this.config) {
@@ -1474,6 +1597,10 @@ class MukanaScraperInjector {
         
         if (configTitleLayerSpan && this.config) {
             configTitleLayerSpan.textContent = this.config.titleLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC7';
+        }
+        
+        if (configQuestionTagLayerSpan && this.config) {
+            configQuestionTagLayerSpan.textContent = this.config.questionTagLayer || 'D692CF88-5C77-47F3-A513-5129BDB76FC8';
         }
         
         if (configTextLayerSpan && this.config) {
@@ -1524,6 +1651,9 @@ class MukanaScraperInjector {
             
             const endpoints = `Name Endpoint:
 127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.titleLayer}
+
+Question Tag Endpoint:
+127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.questionTagLayer}
 
 Text Endpoint:
 127.0.0.1:${port}/api/v1/documents/${docId}/layers/${this.config.textLayer}
@@ -1583,6 +1713,29 @@ QR Endpoint:
         console.log('📝 Cleaned text:', cleanedText);
         
         return { url: url, cleanedText: cleanedText };
+    }
+    
+    // Extract question tag from text (e.g., "[TAG] Question text here")
+    extractQuestionTag(text) {
+        if (!text || typeof text !== 'string') {
+            return { tag: null, cleanedText: text };
+        }
+        
+        // Regex to find question tags in format [TAG] or (TAG) or #TAG
+        const tagRegex = /^[\[\(#]([^\]]+)[\]\)]?\s*(.*)/;
+        const match = text.match(tagRegex);
+        
+        if (!match) {
+            return { tag: null, cleanedText: text };
+        }
+        
+        const tag = match[1].trim();
+        let cleanedText = match[2].trim();
+        
+        console.log('🏷️ Question tag extracted:', tag);
+        console.log('📝 Cleaned question text:', cleanedText);
+        
+        return { tag: tag, cleanedText: cleanedText };
     }
     
     // Send URL to QR endpoint
@@ -1671,6 +1824,50 @@ QR Endpoint:
         } catch (error) {
             console.error('❌ Error clearing QR endpoint:', error);
             this.updateActivityIndicator('❌ QR Clear Error', error.message);
+        }
+    }
+    
+    // Clear question tag endpoint (send empty string)
+    async clearQuestionTagEndpoint() {
+        try {
+            if (!this.config || !this.config.questionTagLayer) {
+                console.error('❌ Question Tag Layer not configured for tag endpoint');
+                return;
+            }
+            
+            // Create URL-encoded JSON for the update parameter with empty string
+            const updateData = {
+                "input-values": {
+                    "tvGroup_Content__Text_TypeMultiline": ""
+                }
+            };
+            const updateParam = encodeURIComponent(JSON.stringify(updateData));
+            
+            // Build the full URL with the update parameter
+            const tagEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.questionTagLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Content__Text_TypeMultiline&update=${updateParam}`;
+            
+            console.log('🌐 Clearing question tag endpoint:', tagEndpoint);
+            
+            const response = await fetch(tagEndpoint, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'MukanaScraper/1.0'
+                }
+            });
+            
+            if (response.ok) {
+                console.log('✅ Question tag endpoint cleared successfully');
+                this.updateActivityIndicator('✅ Tag Cleared', 'Question tag field cleared');
+            } else {
+                const responseText = await response.text();
+                console.error('❌ Failed to clear question tag endpoint. Status:', response.status);
+                console.error('❌ Response text:', responseText);
+                this.updateActivityIndicator('❌ Tag Clear Failed', `Status: ${response.status}`);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error clearing question tag endpoint:', error);
+            this.updateActivityIndicator('❌ Tag Clear Error', error.message);
         }
     }
     
@@ -2132,6 +2329,18 @@ performQuestionCheck() {
             await fetch(textEndpoint, { method: 'GET' });
             console.log('✅ Question text cleared in mimoLive');
             
+            // Clear question tag
+            const clearTagData = {
+                "input-values": {
+                    "tvGroup_Content__Text_TypeMultiline": ""
+                }
+            };
+            const tagParam = encodeURIComponent(JSON.stringify(clearTagData));
+            const tagEndpoint = `http://127.0.0.1:${this.config.port}/api/v1/documents/${this.config.documentId}/layers/${this.config.questionTagLayer}?include=data.attributes.input-values&fields%5Binput-values%5D=tvGroup_Content__Text_TypeMultiline&update=${tagParam}`;
+            
+            await fetch(tagEndpoint, { method: 'GET' });
+            console.log('✅ Question tag cleared in mimoLive');
+            
             // Clear location
             const clearLocationData = {
                 "input-values": {
@@ -2289,6 +2498,7 @@ performQuestionCheck() {
             const documentId = document.getElementById('mukana-document-id').value.trim();
             const port = document.getElementById('mukana-port').value.trim();
             const titleLayer = document.getElementById('mukana-title-layer').value.trim();
+            const questionTagLayer = document.getElementById('mukana-question-tag-layer').value.trim();
             const textLayer = document.getElementById('mukana-text-layer').value.trim();
             const locationLayer = document.getElementById('mukana-location-layer').value.trim();
             const sourceId = document.getElementById('mukana-source-id').value.trim();
@@ -2305,6 +2515,11 @@ performQuestionCheck() {
             
             if (!titleLayer) {
                 alert('Please enter a valid Title Layer ID');
+                return;
+            }
+            
+            if (!questionTagLayer) {
+                alert('Please enter a valid Question Tag Layer ID');
                 return;
             }
             
@@ -2328,6 +2543,7 @@ performQuestionCheck() {
                 documentId: documentId,
                 port: port,
                 titleLayer: titleLayer,
+                questionTagLayer: questionTagLayer,
                 textLayer: textLayer,
                 locationLayer: locationLayer,
                 sourceId: sourceId
@@ -2370,6 +2586,7 @@ performQuestionCheck() {
                 documentId: '572187142',
                 port: '49262',
                 titleLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC7',
+                questionTagLayer: 'D692CF88-5C77-47F3-A513-5129BDB76FC8',
                 textLayer: '11F0706A-4E1E-4DBA-A620-2D3EF44A9F2D',
                 locationLayer: '73F19730-1C97-4660-8091-37428DDEC4A6',
                 sourceId: '572187142-1CDC27E3-762F-4054-86F7-3403FA9518E0'
@@ -2387,6 +2604,7 @@ performQuestionCheck() {
             const documentIdInput = document.getElementById('mukana-document-id');
             const portInput = document.getElementById('mukana-port');
             const titleLayerInput = document.getElementById('mukana-title-layer');
+            const questionTagLayerInput = document.getElementById('mukana-question-tag-layer');
             const textLayerInput = document.getElementById('mukana-text-layer');
             const locationLayerInput = document.getElementById('mukana-location-layer');
             const sourceIdInput = document.getElementById('mukana-source-id');
@@ -2394,11 +2612,9 @@ performQuestionCheck() {
             if (documentIdInput) documentIdInput.value = defaultConfig.documentId;
             if (portInput) portInput.value = defaultConfig.port;
             if (titleLayerInput) titleLayerInput.value = defaultConfig.titleLayer;
-
+            if (questionTagLayerInput) questionTagLayerInput.value = defaultConfig.questionTagLayer;
             if (textLayerInput) textLayerInput.value = defaultConfig.textLayer;
-
             if (locationLayerInput) locationLayerInput.value = defaultConfig.locationLayer;
-
             if (sourceIdInput) sourceIdInput.value = defaultConfig.sourceId;
             
             console.log('✅ Configuration reset to defaults:', this.config);
